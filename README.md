@@ -1,4 +1,6 @@
 Crypto Sentiment Trading Bot
+
+
 Overview
 This project is a Python-based trading bot designed to execute trades on Binance based on the sentiment of tweets from a predefined list of crypto influencers. 
 The bot uses TextBlob for sentiment analysis and interacts with the Binance API to place OCO (One-Cancels-the-Other) trades.
