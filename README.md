@@ -1,4 +1,4 @@
-Crypto Sentiment Trading Bot
+<h1>Crypto Sentiment Trading Bot<h1>
 
 
 Overview
