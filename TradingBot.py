@@ -100,7 +100,10 @@ def buy_based_on_sentiment(symbol, sentiment, portfolio_value):
 
         place_oco_order(symbol, quantity, coin_price * 0.8, coin_price * 1.2)
 
-def check_portfolio_and_sell(symbol):
+def check_portfolio_and_sell(symbol,sentiment):
+    if sentiment >= -0.5:
+        print("Sentiment is not low enough to sell. No action taken.")
+        return
     portfolio = get_portfolio()
     for asset in portfolio:
         if asset['asset'] == symbol.replace('USDT', '') and float(asset['free']) > 0:
@@ -134,7 +137,7 @@ def run_bot():
                     buy_based_on_sentiment(symbol, sentiment, portfolio_value)
                 elif sentiment < 0:
                     # Sell if sentiment is negative and you hold the coin
-                    check_portfolio_and_sell(symbol)
+                    check_portfolio_and_sell(symbol,sentiment)
                 
         # Sleep for 3 minutes (180 seconds) before the next run
         time.sleep(180)
