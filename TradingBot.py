@@ -4,7 +4,30 @@ from binance.spot import Spot as Client
 from binance.error import ClientError
 import random
 import math
+import tweepy
  
+#x keys
+consumer_key = ''
+consumer_secret = ''
+access_token = ''
+access_token_secret = ''
+
+# Authenticate to Twitter
+auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret, access_token, access_token_secret)
+api = tweepy.API(auth)
+
+crypto_influencers = [
+    "@APompliano",     
+    "@VitalikButerin", 
+    "@cz_binance",     
+    "@100trillionUSD", 
+    "@aantonop",       
+    "@saylor",         
+    "@elonmusk",       
+    "@TheCryptoLark",  
+    "@PeterMcCormack", 
+    "@WhalePanda"      
+]
 
 API_KEY = "pBnWV34uTdhQxBT3UjbQbXebDJwO4nazjaW0j5dU6TfM2vVuiRNOnkvYg8r9lrAA"
 API_SECRET = "y7N8mAvrTeB6iNkGE286loelrTpuqx73jeg0e1gqNtpHqFu6vY1Gf95KzEE8HKmy"
@@ -16,9 +39,11 @@ client = Client(API_KEY, API_SECRET,base_url = "https://testnet.binance.vision")
 mock_tweets = [
     "Wow, Bitcoin is going to the moon!",  
     "Ethereum is facing some serious issues.",  
-    "Dogecoin is performing okay.",  
+    "BinanceCoin is performing okay.",  
     "Bitcoin dropped hard, time to sell!",  
-    "Solana is the fastest blockchain out there. Scaling like crazy!" 
+    "Solana is the fastest blockchain out there. Scaling like crazy!" ,
+    "BNB is killing it! Binance ecosystem growing stronger every day",
+    "Solana network down again. How can we trust it to scale"
 ]
 
 def get_mock_tweets():
@@ -46,7 +71,6 @@ def get_portfolio():
 
 def place_order(symbol, quantity,site):
     try:
-        # Place a market buy order
         order = client.new_order(
             symbol=symbol,
             side=site,
@@ -63,7 +87,7 @@ def place_oco_order(symbol, quantity, stop_price, limit_price):
             symbol=symbol,
             side="SELL",
             quantity=quantity,
-            aboveType='LIMIT_MAKER',  # Take-profit should be a limit maker
+            aboveType='LIMIT_MAKER',  # 
             belowType='STOP_LOSS_LIMIT',
             abovePrice=round(limit_price,2),
             belowPrice = round(stop_price,2),
@@ -131,8 +155,22 @@ def buy_based_on_sentiment(symbol, sentiment, portfolio_value):
 
         place_oco_order(symbol, quantity, coin_price * 0.8, coin_price * 1.2)
 
+def fetch_latest_tweets():
+    tweets = []
+    for influencer in crypto_influencers:
+        try:
+            # Uncomment this block once ready to use the Twitter API
+            influencer_tweets = api.user_timeline(screen_name=influencer, count=5, tweet_mode='extended')
+            for tweet in influencer_tweets:
+                tweets.append(f"{influencer}: {tweet.full_text}")
+            
+        except tweepy.TweepError as e:
+            print(f"Error fetching tweets from {influencer}: {e}")
+    
+    return tweets
+
 def check_portfolio_and_sell(symbol,sentiment):
-    if sentiment >= -0.5:
+    if sentiment >= -0.3:
         print("Sentiment is not low enough to sell. No action taken.")
         return
     portfolio = get_portfolio()
@@ -141,26 +179,28 @@ def check_portfolio_and_sell(symbol,sentiment):
             quantity = float(asset['free'])
             try:
                 sell_order = place_order(symbol, quantity,'SELL')
-                print(f"Sold {quantity} of {symbol} due to negative sentiment: {sell_order}")
+                print(f"Sold {quantity} of {symbol} due to negative sentiment")
             except Exception as e:
                 print(f"Error placing market sell order: {e}")
 
+
 def run_bot():
-    coins = ["Bitcoin", "Dogecoin", "Ethereum","Solana","Xrp"]  
+    coins = ["Bitcoin", "BinanceCoin", "Ethereum","Solana","LiteCoin"]  
 
     while True:
         tweets = get_mock_tweets()  # Replace with Twitter API call later
+       # tweets = fetch_latest_tweets() 
 
         tweet = random.choice(tweets) 
 
         for coin in coins:
             if coin in tweet:
-                sentiment = analyze_sentiment(tweet)  # Perform sentiment analysis
+                sentiment = analyze_sentiment(tweet) 
                 print(f"Tweet: {tweet}")
                 print(f"Sentiment: {sentiment}")
 
                 symbol = get_symbol(coin) + 'USDT' 
-                portfolio_value = 1000  # Placeholder for your portfolio value
+                portfolio_value = 1000  # Placeholder for your portfolio value that you want to be spent by the bot
 
                 if sentiment > 0:
                     # Buy based on the sentiment analysis
@@ -169,8 +209,8 @@ def run_bot():
                     # Sell if sentiment is negative and you hold the coin
                     check_portfolio_and_sell(symbol,sentiment)
                 
-        # Sleep for 3 minutes (180 seconds) before the next run
-        time.sleep(180)
+        # Sleep for 1 minute and search again for tweet
+        time.sleep(60)
         
 if __name__ == "__main__":
     run_bot()
