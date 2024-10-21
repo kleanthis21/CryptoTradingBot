@@ -3,6 +3,7 @@ from textblob import TextBlob
 from binance.spot import Spot as Client
 from binance.error import ClientError
 import random
+import math
  
 
 API_KEY = "pBnWV34uTdhQxBT3UjbQbXebDJwO4nazjaW0j5dU6TfM2vVuiRNOnkvYg8r9lrAA"
@@ -13,10 +14,11 @@ client = Client(API_KEY, API_SECRET,base_url = "https://testnet.binance.vision")
 
 
 mock_tweets = [
-    "Wow, Bitcoin is going to the moon!",  # Positive sentiment
-    "Ethereum is facing some serious issues.",  # Negative sentiment
-    "Dogecoin is performing okay.",  # Neutral sentiment
-    "Bitcoin dropped hard, time to sell!"  # Negative sentiment
+    "Wow, Bitcoin is going to the moon!",  
+    "Ethereum is facing some serious issues.",  
+    "Dogecoin is performing okay.",  
+    "Bitcoin dropped hard, time to sell!",  
+    "Solana is the fastest blockchain out there. Scaling like crazy!" 
 ]
 
 def get_mock_tweets():
@@ -27,8 +29,8 @@ def get_symbol(coin_name):
         'bitcoin': 'BTC',
         'ethereum': 'ETH',
         'solana': 'SOL',
-        'dogecoin': 'DOGE',
-        'ripple': 'XRP',      
+        'LiteCoin': 'LTC',
+        'BinanceCoin': 'BNB',      
     }
     
     return coin_mapping.get(coin_name.lower(), coin_name.upper())
@@ -57,22 +59,47 @@ def place_order(symbol, quantity,site):
 
 def place_oco_order(symbol, quantity, stop_price, limit_price):
     try:
-        order = client.order_oco_sell(
+        order = client.new_oco_order(
             symbol=symbol,
+            side="SELL",
             quantity=quantity,
-            price=str(limit_price),
-            stopPrice=str(stop_price),
-            stopLimitPrice=str(stop_price * 0.99),  # Slightly lower stop-limit to ensure execution
-            stopLimitTimeInForce='GTC'
+            aboveType='LIMIT_MAKER',  # Take-profit should be a limit maker
+            belowType='STOP_LOSS_LIMIT',
+            abovePrice=round(limit_price,2),
+            belowPrice = round(stop_price,2),
+            belowStopPrice = round(stop_price * 0.98,2),
+            belowTimeInForce = 'GTC' # Good 'til Canceled
         )
         print(f"OCO Order placed for {symbol}: {order}")
     except Exception as e:
         print(f"Error placing OCO order: {e}")
 
+def get_quantity_precision(symbol):
+    try:
+        exchange_info = client.exchange_info()
+        symbol_info = next((s for s in exchange_info['symbols'] if s['symbol'] == symbol), None)
+
+        if symbol_info:          
+            filters = symbol_info['filters']
+            step_size = next((f['stepSize'] for f in filters if f['filterType'] == 'LOT_SIZE'), None)
+
+            if step_size:             
+                precision = int(round(-math.log(float(step_size), 10), 0))
+                return precision
+            else:
+                print(f"Step size not found for {symbol}.")
+                return None
+        else:
+            print(f"Symbol info not found for {symbol}.")
+            return None
+    except Exception as e:
+        print(f"Error fetching exchange info: {e}")
+        return None
+
 # buy coins based on sentiment analysis from textblob
 def buy_based_on_sentiment(symbol, sentiment, portfolio_value):
     if sentiment >= 0.5:
-        purchase_percentage = 15 + (sentiment - 0.5) * (30 - 15) / (1 - 0.5)
+        purchase_percentage = 15 
     elif sentiment > 0:
         purchase_percentage = 5
     else:
@@ -89,11 +116,15 @@ def buy_based_on_sentiment(symbol, sentiment, portfolio_value):
             return
 
         quantity = amount_to_invest / coin_price
-
+        precision = get_quantity_precision(symbol)
+        
+        if precision is not None:
+            quantity = round(quantity, precision)      
+        
         try:
-            # Instant buy first , so the oco trade will follow
-            buy_order = place_order(symbol,quantity,'BUY')
-            print(f"Bought {quantity} of {symbol} at price {coin_price}: {buy_order}")
+            # Instant buy first, so the OCO trade will follow
+            buy_order = client.new_order(symbol=symbol, side='BUY', type='MARKET', quantity=quantity)
+            print(f"Bought {quantity} of {symbol} at price {coin_price}")
         except Exception as e:
             print(f"Error placing market buy order: {e}")
             return
@@ -114,14 +145,13 @@ def check_portfolio_and_sell(symbol,sentiment):
             except Exception as e:
                 print(f"Error placing market sell order: {e}")
 
-# Main bot logic
 def run_bot():
     coins = ["Bitcoin", "Dogecoin", "Ethereum","Solana","Xrp"]  
 
     while True:
         tweets = get_mock_tweets()  # Replace with Twitter API call later
 
-        tweet = random.choice(tweets) # get a random tweet from the mock tweets
+        tweet = random.choice(tweets) 
 
         for coin in coins:
             if coin in tweet:
@@ -129,7 +159,7 @@ def run_bot():
                 print(f"Tweet: {tweet}")
                 print(f"Sentiment: {sentiment}")
 
-                symbol = get_symbol(coin) + 'USDT'  # Get trading symbol
+                symbol = get_symbol(coin) + 'USDT' 
                 portfolio_value = 1000  # Placeholder for your portfolio value
 
                 if sentiment > 0:
