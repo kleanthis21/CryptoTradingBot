@@ -4,17 +4,17 @@ from binance.spot import Spot as Client
 from binance.error import ClientError
 import random
 import math
-import tweepy
+#import tweepy
  
 #x keys
-consumer_key = ''
-consumer_secret = ''
-access_token = ''
-access_token_secret = ''
+consumer_key = 'my_key'
+consumer_secret = 'my_consumer_secret'
+access_token = 'my_access_toke'
+access_token_secret = 'my_access_token_secret'
 
 # Authenticate to Twitter
-auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret, access_token, access_token_secret)
-api = tweepy.API(auth)
+#auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret, access_token, access_token_secret)
+#api = tweepy.API(auth)
 
 crypto_influencers = [
     "@APompliano",     
@@ -29,8 +29,8 @@ crypto_influencers = [
     "@WhalePanda"      
 ]
 
-API_KEY = "pBnWV34uTdhQxBT3UjbQbXebDJwO4nazjaW0j5dU6TfM2vVuiRNOnkvYg8r9lrAA"
-API_SECRET = "y7N8mAvrTeB6iNkGE286loelrTpuqx73jeg0e1gqNtpHqFu6vY1Gf95KzEE8HKmy"
+API_KEY = ""
+API_SECRET = ""
 
 
 client = Client(API_KEY, API_SECRET,base_url = "https://testnet.binance.vision")
@@ -62,7 +62,7 @@ def get_symbol(coin_name):
 
 def analyze_sentiment(text):
     analysis = TextBlob(text)
-    return analysis.sentiment.polarity  # Returns sentiment between -1 and 1
+    return analysis.sentiment.polarity  
 
 def get_portfolio():
     account = client.account()
@@ -92,7 +92,7 @@ def place_oco_order(symbol, quantity, stop_price, limit_price):
             abovePrice=round(limit_price,2),
             belowPrice = round(stop_price,2),
             belowStopPrice = round(stop_price * 0.98,2),
-            belowTimeInForce = 'GTC' # Good 'til Canceled
+            belowTimeInForce = 'GTC' 
         )
         print(f"OCO Order placed for {symbol}: {order}")
     except Exception as e:
@@ -123,9 +123,9 @@ def get_quantity_precision(symbol):
 # buy coins based on sentiment analysis from textblob
 def buy_based_on_sentiment(symbol, sentiment, portfolio_value):
     if sentiment >= 0.5:
-        purchase_percentage = 15 
+        purchase_percentage = 15  # 15 % of 1000
     elif sentiment > 0:
-        purchase_percentage = 5
+        purchase_percentage = 10 # 10 % of 1000
     else:
         purchase_percentage = 0
 
@@ -159,14 +159,14 @@ def fetch_latest_tweets():
     tweets = []
     for influencer in crypto_influencers:
         try:
+            x = 1 #dummy line 
             # Uncomment this block once ready to use the Twitter API
-            influencer_tweets = api.user_timeline(screen_name=influencer, count=5, tweet_mode='extended')
-            for tweet in influencer_tweets:
-                tweets.append(f"{influencer}: {tweet.full_text}")
+            #influencer_tweets = api.user_timeline(screen_name=influencer, count=5, tweet_mode='extended')
+            #for tweet in influencer_tweets:
+            #   tweets.append(f"{influencer}: {tweet.full_text}")
             
-        except tweepy.TweepError as e:
-            print(f"Error fetching tweets from {influencer}: {e}")
-    
+        except tweets as e:
+            print(f"Error fetching tweets from {influencer}: {e}")   
     return tweets
 
 def check_portfolio_and_sell(symbol,sentiment):
@@ -188,11 +188,11 @@ def run_bot():
     coins = ["Bitcoin", "BinanceCoin", "Ethereum","Solana","LiteCoin"]  
 
     while True:
-        tweets = get_mock_tweets()  # Replace with Twitter API call later
-       # tweets = fetch_latest_tweets() 
+        tweets = get_mock_tweets()  #Should be replace with Twitter API call later-mock tweets
+       # tweets = fetch_latest_tweets() #the actual call for tweet fetch from x 
 
         tweet = random.choice(tweets) 
-
+        #for tweet in tweets: # uncomment in x retrieval of tweets
         for coin in coins:
             if coin in tweet:
                 sentiment = analyze_sentiment(tweet) 
