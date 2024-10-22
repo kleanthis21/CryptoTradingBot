@@ -7,30 +7,33 @@ The bot uses TextBlob for sentiment analysis and interacts with the Binance API 
 
 The bot:
 
-Checks Twitter accounts of five crypto influencers every three minutes for tweets mentioning specific cryptocurrencies (e.g., Bitcoin, Dogecoin, Ethereum).
+Checks Twitter accounts of ten crypto influencers every minute for tweets mentioning specific cryptocurrencies (e.g., Bitcoin, Dogecoin, Ethereum).
 Performs sentiment analysis on the tweets using TextBlob.
 Places a buy order if the sentiment is positive, with OCO conditions (20% up or 20% down).
 If the sentiment is negative and the coin is already in the user's portfolio, it will sell the coin instantly.
 This project is developed as part of my MSc diploma thesis for research and educational purposes.
 
 <h2>Features</h2>
-Sentiment Analysis: Uses TextBlob to analyze tweet sentiment (range: -1 to 1).
-Binance Integration: Automatically places buy/sell orders on Binance using the Binance API.
-OCO Orders: Automatically sets OCO sell conditions (20% up or down).
-Configurable Influencers and Coins: Easily update the list of influencers and cryptocurrencies to track.
+Fetches the latest tweets from a predefined list of crypto influencers (currently uses mock tweets for testing).
+Analyzes the sentiment of tweets using the TextBlob library:
+  i)Positive sentiment triggers a buy order.
+ ii)Negative sentiment checks if the coin is in the user's portfolio, and if found, sells the coin.
+Executes trades on the Binance testnet (no real funds used) using the Binance API.
+Fully customizable for sentiment thresholds and portfolio management.
 
 <h2>Prerequisites</h2>
 Before you begin, ensure you have met the following requirements:
-Python 3.x installed on your machine
-A Binance account with API access enabled
+Python 3.7 installed on your machine
+Binance Spot API (binance-connector library)
 Twitter Developer API access
 Binance API keys
-A virtual environment for Python (recommended)
+TextBlob for sentiment analysis
+
 
 <h2>Required Python Packages</h2>
 Install the required dependencies using pip:
 pip install textblob
-pip install python-binance
+pip install binance-connector
 pip install tweepy
 
 <h2>Additional Setup</h2>
@@ -47,34 +50,35 @@ Sign up for a Binance account.
 Go to the API Management section of your Binance account and generate an API key and secret.
 Add the API keys to your .env file or the configuration section of the bot.
 
-<h2>Configuration</h2>
-Create a .env file in the root directory of your project and add the following variables:
-
-BINANCE_API_KEY=your_binance_api_key
-BINANCE_API_SECRET=your_binance_api_secret
-TWITTER_API_KEY=your_twitter_api_key
-TWITTER_API_SECRET=your_twitter_api_secret
-TWITTER_ACCESS_TOKEN=your_twitter_access_token
-TWITTER_ACCESS_TOKEN_SECRET=your_twitter_access_token_secret
-
 <h2>How to Use</h2>
 <h3>Running the Bot</h3>
-To run the bot, simply execute the following command in your terminal:
-python bot.py
-The bot will:
+1)Clone The Repo:
+git clone https://github.com/yourusername/crypto-sentiment-trading-bot.git
 
-Retrieve tweets from the predefined influencers every 3 minutes.
-Perform sentiment analysis on each tweet.
-Place buy orders if the sentiment is positive, or sell the coin from your portfolio if the sentiment is negative.
+2)Add your Binance API keys and Twitter API credentials:
+  Update the following fields in the script with your actual keys:
+  # Binance API keys (testnet)
+  API_KEY = "your_binance_api_key"
+  API_SECRET = "your_binance_api_secret"
+  
+  # Twitter API keys
+  consumer_key = 'your_twitter_consumer_key'
+  consumer_secret = 'your_twitter_consumer_secret'
+  access_token = 'your_twitter_access_token'
+  access_token_secret = 'your_twitter_access_token_secret'
+3)Define the influencers you want to track
+4)Update the coins list with the names of coins you want to monitor in the bot logic.
+
 
 <h2>Testing</h2>
-For testing purposes, you can use predefined tweet strings in the code instead of retrieving actual tweets. Just comment out the Twitter API call and replace it with sample text to simulate the tweet analysis and trade execution process.
-sample_tweet = "Wow! Bitcoin is going to the moon!"
+Currently, the bot uses mock tweets to simulate tweet fetching. You can replace the get_mock_tweets function with actual Twitter API calls once you're ready to use live data:
 
-<h2>Modify Influencers and Coins</h2>
-You can modify the list of influencers and cryptocurrencies in the bot’s configuration:
-influencers = ['influencer1', 'influencer2', 'influencer3']
-cryptos = ['BTC', 'DOGE', 'ETH']
+<h2>Customization<h2></h2>
+Sentiment Analysis: Adjust the sentiment thresholds in the buy_based_on_sentiment function to control how aggressive the bot is when purchasing or selling based on tweet sentiment.
+Portfolio Value: Modify the portfolio_value variable to represent how much of your total balance you'd like to trade.
+
+Disclaimer
+This bot is not intended for live trading and should only be used for testing and learning purposes. If you decide to use it with real funds, please proceed with caution and understand the risks involved in automated trading.
 
 
 
