@@ -5,7 +5,8 @@ from binance.error import ClientError
 import random
 import math
 #import tweepy
- 
+from typing import List, Dict, Optional
+
 #x keys
 consumer_key = 'my_key'
 consumer_secret = 'my_consumer_secret'
@@ -46,10 +47,10 @@ mock_tweets = [
     "Solana network down again. How can we trust it to scale"
 ]
 
-def get_mock_tweets():
+def get_mock_tweets() -> List[str]:
     return mock_tweets
 
-def get_symbol(coin_name):
+def get_symbol(coin_name: str) -> str:
     coin_mapping = {
         'bitcoin': 'BTC',
         'ethereum': 'ETH',
@@ -60,16 +61,16 @@ def get_symbol(coin_name):
     
     return coin_mapping.get(coin_name.lower(), coin_name.upper())
 
-def analyze_sentiment(text):
+def analyze_sentiment(text: str) -> float:
     analysis = TextBlob(text)
     return analysis.sentiment.polarity  
 
-def get_portfolio():
+def get_portfolio() -> List[Dict[str, str]]:
     account = client.account()
     balances = account['balances']
     return balances  
 
-def place_order(symbol, quantity,site):
+def place_order(symbol: str, quantity: float, site: str) -> None:
     try:
         order = client.new_order(
             symbol=symbol,
@@ -81,13 +82,13 @@ def place_order(symbol, quantity,site):
     except ClientError as e:
         print(f"Error occurred: {e.error_code} - {e.error_message}")
 
-def place_oco_order(symbol, quantity, stop_price, limit_price):
+def place_oco_order(symbol: str, quantity: float, stop_price: float, limit_price: float) -> None:
     try:
         order = client.new_oco_order(
             symbol=symbol,
             side="SELL",
             quantity=quantity,
-            aboveType='LIMIT_MAKER',  # 
+            aboveType='LIMIT_MAKER',  
             belowType='STOP_LOSS_LIMIT',
             abovePrice=round(limit_price,2),
             belowPrice = round(stop_price,2),
@@ -98,7 +99,7 @@ def place_oco_order(symbol, quantity, stop_price, limit_price):
     except Exception as e:
         print(f"Error placing OCO order: {e}")
 
-def get_quantity_precision(symbol):
+def get_quantity_precision(symbol: str) -> Optional[int]:
     try:
         exchange_info = client.exchange_info()
         symbol_info = next((s for s in exchange_info['symbols'] if s['symbol'] == symbol), None)
@@ -121,7 +122,7 @@ def get_quantity_precision(symbol):
         return None
 
 # buy coins based on sentiment analysis from textblob
-def buy_based_on_sentiment(symbol, sentiment, portfolio_value):
+def buy_based_on_sentiment(symbol: str, sentiment: float, portfolio_value: float) -> None:
     if sentiment >= 0.5:
         purchase_percentage = 15  # 15 % of 1000
     elif sentiment > 0:
@@ -155,7 +156,7 @@ def buy_based_on_sentiment(symbol, sentiment, portfolio_value):
 
         place_oco_order(symbol, quantity, coin_price * 0.8, coin_price * 1.2)
 
-def fetch_latest_tweets():
+def fetch_latest_tweets() -> List[str]:
     tweets = []
     for influencer in crypto_influencers:
         try:
@@ -169,7 +170,7 @@ def fetch_latest_tweets():
             print(f"Error fetching tweets from {influencer}: {e}")   
     return tweets
 
-def check_portfolio_and_sell(symbol,sentiment):
+def check_portfolio_and_sell(symbol: str, sentiment: float) -> None:
     if sentiment >= -0.3:
         print("Sentiment is not low enough to sell. No action taken.")
         return
@@ -184,7 +185,7 @@ def check_portfolio_and_sell(symbol,sentiment):
                 print(f"Error placing market sell order: {e}")
 
 
-def run_bot():
+def run_bot() -> None:
     coins = ["Bitcoin", "BinanceCoin", "Ethereum","Solana","LiteCoin"]  
 
     while True:
