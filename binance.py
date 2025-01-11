@@ -2,8 +2,8 @@ from binance.spot import Spot as Client
 from binance.error import ClientError
 import math
 
-API_KEY = "your_api_key"
-API_SECRET = "your_api_secret"
+API_KEY = "my_api_key"
+API_SECRET = "my_api_secret"
 
 client = Client(API_KEY, API_SECRET, base_url="https://testnet.binance.vision")
 
@@ -19,16 +19,18 @@ def place_order(symbol: str, quantity: float, side: str):
     except ClientError as e:
         print(f"Error occurred: {e.error_code} - {e.error_message}")
 
-def place_oco_order(symbol: str, quantity: float, stop_price: float, limit_price: float):
+def place_oco_order(symbol, quantity, stop_price, limit_price):
     try:
         order = client.new_oco_order(
             symbol=symbol,
             side="SELL",
             quantity=quantity,
-            price=round(limit_price, 2),
-            stopPrice=round(stop_price, 2),
-            stopLimitPrice=round(stop_price * 0.98, 2),
-            stopLimitTimeInForce='GTC'
+            aboveType='LIMIT_MAKER',  
+            belowType='STOP_LOSS_LIMIT',
+            abovePrice=round(limit_price,2),
+            belowPrice = round(stop_price,2),
+            belowStopPrice = round(stop_price * 0.98,2),
+            belowTimeInForce = 'GTC' 
         )
         print(f"OCO Order placed for {symbol}: {order}")
     except Exception as e:
