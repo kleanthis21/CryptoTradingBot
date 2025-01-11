@@ -1,5 +1,20 @@
 import random
 
+#x keys
+CONSUMER_KEY = 'my_key'
+consumer_secret = 'my_consumer_secret'
+access_token = 'my_access_toke'
+access_token_secret = 'my_access_token_secret'
+
+CONSUMER_KEY = 'my_key'
+CONSUMER_SECRET = 'my_consumer_secret'
+ACCESS_TOKEN = 'my_access_toke'
+ACCESS_TOKEN_SECRET = 'my_access_token_secret'
+
+# Authenticate to X
+#AUTH = tweepy.OAuth1UserHandler(consumer_key, consumer_secret, access_token, access_token_secret)
+#API = tweepy.API(auth)
+
 crypto_influencers = [
     "@APompliano",     
     "@VitalikButerin", 
