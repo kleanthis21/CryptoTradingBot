@@ -41,10 +41,11 @@ def fetch_tweets_and_process():
     coins = ["Bitcoin", "BinanceCoin", "Ethereum", "Solana", "LiteCoin"]  
 
     while True:
-        tweets = get_mock_tweets()
-
+        tweets = get_mock_tweets() #Should be replace with Twitter API call later----GET mock tweets for now
+        # tweets = fetch_latest_tweets() #the actual call for tweet fetch from x 
+        
         tweet = random.choice(tweets) 
-
+         #for tweet in tweets: # uncomment in x retrieval of tweets
         for coin in coins:
             if coin in tweet:
                 sentiment = analyze_sentiment(tweet) 
